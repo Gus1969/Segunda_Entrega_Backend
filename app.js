@@ -1,11 +1,11 @@
 const express = require('express');
-//const path = require ('path');
+const path = require ('path');
 const cors = require ('cors');
-//const authRouter = require("./routes/auth");
-//const { router:  tareasRouter} = require ("./routes/tareas");
+const authRouter = require("./source/routes/auth");
+const { router:  tareasRouter} = require("./source/routes/tarea");
 
 const app = express();
-const PORT = 4000 ;
+const PORT = 3000 ;
 app.use(express.json());
 app.use(express.urlencoded({
     extended: true,
@@ -17,6 +17,8 @@ app.use(cors());
 app.get('/', (req, res) => {
     res.send("Servidor creado")
 })
+app.use('/auth', authRouter);
+app.use('/tarea', tareasRouter)
     
 
 
