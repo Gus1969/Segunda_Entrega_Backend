@@ -73,7 +73,7 @@ const songs  = [
 ]
 router.get("/", (req, res) => {
   res.send({
-    tareas: listaDeTareas,
+    tarea: songs,
   });
 });
 
@@ -83,7 +83,7 @@ router.post("/", verifyToken, (req, res) => {
 
   const newSong = {
     nombre: nombre,
-    ruta,
+    ruta: ruta,
     icono: req.user.icono,
     artista: req.user.artista,
     reproducciones: req.user.reproducciones

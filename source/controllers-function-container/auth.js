@@ -1,30 +1,29 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { TOKEN_SECRET, verifyToken } = require('../middlewares/jwt-validate')
 
-const {songs} = require('../routes/tarea');
+ const bcrypt = require('bcrypt'); const jwt = require('jsonwebtoken');
+ const jwt = require('jsonwebtoken')
+ const { TOKEN_SECRET, verifyToken } = require('../middlewares/jwt-validate')
+ const {songs} = require('../routes/tarea');
 
-const router = express.Router();
 
-router.get('/', (req, res) => {
-    res.json({success: true});
-});
 
-router.post('/registro', async(req, res) =>{
-    if (req.body.mail && req.body.password) {
+
+  const registro = async(req, res, next) => {
+    try {
+      if (req.body.email && req.body.password && req.body.confirm) {
         // Formato del mail
         if (/^\S+@\S+\.\S+$/.test(req.body.mail) === false) {
-          res.status(400).json({ success: false, message: "Formato de email incorrecto" });
+          res
+            .status(400)
+            .json({ success: false, message: "Formato de mail incorrecto" });
           return;
         }
     
         const existeUser = usuarios.find((u) => {
-          return u.mail === req.body.mail;
+          return u.email === req.body.email;
         });
     
         if (existeUser) {
-          res.status(400).json({ success: false, message: "Este email ya existe"});
+          res.status(400).json({ success: false, message: "email repetido" });
           return;
         }
     
@@ -33,8 +32,9 @@ router.post('/registro', async(req, res) =>{
         const password = await bcrypt.hash(req.body.password, salt);
     
         const newUser = {
-          mail: req.body.mail,
-          password: password
+          email: req.body.email,
+          password: password,
+          confirm: password
         };
     
         usuarios.push(newUser);
@@ -43,12 +43,21 @@ router.post('/registro', async(req, res) =>{
       } else {
         return res.status(400).json({
           success: false,
-          message: "No se ingresaron los datos requeridos.",
+          message: "Faltan datos (requeridos: email, password, confirmacion)",
         });
       }
-    });
-    router.post('/login', async(req, res) =>{
-      const user = usuarios.find((u) => u.mail === req.body.mail);
+
+    } catch (error) {
+      return next (error);
+      
+    }
+  };
+    
+  
+    const login = async(req, res, next) =>{
+
+      try {
+        const user = usuarios.find((u) => u.email === req.body.email);
       if(!user) {
         return res.status(400).json({error: "User not registered"});
        
@@ -64,6 +73,8 @@ router.post('/registro', async(req, res) =>{
         },
         TOKEN_SECRET
     );
+    
+      usuarios.push(newUser);
 
     console.log("login en auth, songs", songs);
     res.status(200).json ({
@@ -71,16 +82,37 @@ router.post('/registro', async(req, res) =>{
       data: "Login successful",
       token,
       songs: songs,
-    });
-      });
-    
- router.get("/usuarios", verifyToken, (req, res) => {
-   console.log(req.user);
-   res.json({error: null, usuarios})
+    }); 
+      } catch (error) {
+        return next(error)
+      }
+      };
 
- });
- module.exports = router;
+      
+
+    
+ 
+ 
+ 
+ 
+//  const getUser = (req, res) =>{
+//    try {
+//      return res.json({error: null, usuarios})
+     
+//    } catch (error) {
+//      console.log(error)
+     
+//    }
+//  }
  const usuarios = [{
-   mail: "gustavoubal@aol.com",
-   password: "12345@test"
+  email: "gustavoubal@aol.com",
+  password: "12345@test",
+  confirmacion: "12345@test",
  }];
+ 
+ module.exports = {
+   registro, 
+   login
+ }
+
+ 
