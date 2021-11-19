@@ -1,7 +1,7 @@
 
- const bcrypt = require('bcrypt'); const jwt = require('jsonwebtoken');
+ const bcrypt = require('bcrypt'); 
  const jwt = require('jsonwebtoken')
- const { TOKEN_SECRET, verifyToken } = require('../middlewares/jwt-validate')
+ const {TOKEN_SECRET} = require('../middlewares/jwt-validate')
  const {songs} = require('../routes/tarea');
 
 
@@ -9,9 +9,9 @@
 
   const registro = async(req, res, next) => {
     try {
-      if (req.body.email && req.body.password && req.body.confirm) {
+      if (req.body.name && req.body.mail && req.body.password) {
         // Formato del mail
-        if (/^\S+@\S+\.\S+$/.test(req.body.mail) === false) {
+        if (/^\S+@\S+\.\S+$/.test(req.body.email) === false) {
           res
             .status(400)
             .json({ success: false, message: "Formato de mail incorrecto" });
@@ -32,9 +32,10 @@
         const password = await bcrypt.hash(req.body.password, salt);
     
         const newUser = {
-          email: req.body.email,
-          password: password,
-          confirm: password
+          nombre: req.body.name,
+          mail: req.body.email,
+          password: password
+          
         };
     
         usuarios.push(newUser);
@@ -43,7 +44,7 @@
       } else {
         return res.status(400).json({
           success: false,
-          message: "Faltan datos (requeridos: email, password, confirmacion)",
+          message: "Faltan campos por completar",
         });
       }
 
@@ -57,62 +58,64 @@
     const login = async(req, res, next) =>{
 
       try {
-        const user = usuarios.find((u) => u.email === req.body.email);
-      if(!user) {
-        return res.status(400).json({error: "User not registered"});
-       
-      }
-      const validPassword = await bcrypt.compare(req.body.password, user.password);
-      if(!validPassword) {
-        return res.status(400).json ({error: "Invalid Password"})
-      }
-      const token = jwt.sign(
-        {
-          mail: user.mail,
-          password: user.password
-        },
-        TOKEN_SECRET
-    );
-    
-      usuarios.push(newUser);
-
-    console.log("login en auth, songs", songs);
-    res.status(200).json ({
-      error: null, 
-      data: "Login successful",
-      token,
-      songs: songs,
-    }); 
-      } catch (error) {
-        return next(error)
-      }
+        
+          const user = usuarios.find((u) => u.mail === req.body.mail);
+      
+          if (!user) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Usuario no encontrado" });
+          }
+      
+          const validPwd = await bcrypt.compare(
+            req.body.password,
+            user.password
+          );
+      
+          if (!validPwd) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Wrong Password" });
+          }
+      
+          const token = jwt.sign(
+            {
+              name: user.name,
+              mail: user.mail,
+            },
+            TOKEN_SECRET
+          );
+      
+          return res.status(200).json({
+            success: true,
+            data: user,
+            token: token,
+          });
+        } catch (error) {
+          return next(error);
+        }
       };
 
-      
-
-    
- 
- 
- 
- 
-//  const getUser = (req, res) =>{
-//    try {
-//      return res.json({error: null, usuarios})
-     
-//    } catch (error) {
-//      console.log(error)
-     
-//    }
-//  }
  const usuarios = [{
-  email: "gustavoubal@aol.com",
+   name: "Gustavo",
+  mail: "gustavoubal@aol.com",
   password: "12345@test",
-  confirmacion: "12345@test",
+  
  }];
+
+ const getUser = async (req, res, next) => {
+   try {
+     return res.json({error: null, usuarios})
+   } catch (error) {
+     return next(error)
+     
+   }
+ }
  
  module.exports = {
-   registro, 
-   login
+   //registro, 
+   login,
+   getUser
  }
 
  
