@@ -5,7 +5,7 @@ const authRouter = require("./source/routes/auth");
 const { router:  tareasRouter} = require("./source/routes/tarea");
 
 const app = express();
-const PORT = 10000 ;
+const PORT = 3000 ;
 app.use(express.json());
 app.use(express.urlencoded({
     extended: true,
