@@ -77,11 +77,11 @@ router.get("/", (req, res) => {
   });
 });
 
-router.post("/", verifyToken, (req, res) => {
+router.post("/ songs", verifyToken, (req, res) => {
   const nombre = req.body.nombre;
   const ruta = req.body.ruta;
 
-  const newSong = {
+  const canciones = {
     nombre: nombre,
     ruta: ruta,
     icono: req.user.icono,
@@ -89,15 +89,15 @@ router.post("/", verifyToken, (req, res) => {
     reproducciones: req.user.reproducciones
   };
 
-  songs.push(newSong);
+  songs.push(canciones);
 
   res.send({
     canciones: songs,
-    nuevoTema: newSong,
+    
   });
 });
 
 module.exports = {
   router: router,
-  songs: songs,
+  songs,
 };
