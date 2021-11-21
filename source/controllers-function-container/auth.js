@@ -2,15 +2,15 @@
  const bcrypt = require('bcrypt'); 
  const jwt = require('jsonwebtoken')
  const {TOKEN_SECRET} = require('../middlewares/jwt-validate')
- const {songs} = require('../routes/tarea');
+ //const {songs} = require('../routes/tarea');
 
 
 
 
   const registro = async(req, res, next) => {
     try {
-      if (req.body.name && req.body.mail && req.body.password) {
-        // Formato del mail
+      if (req.body.email && req.body.password && req.body.confirm && req.body.genero && req.body.edad) {
+        //expresion regular para validar formato de email
         if (/^\S+@\S+\.\S+$/.test(req.body.email) === false) {
           res
             .status(400)
@@ -23,19 +23,22 @@
         });
     
         if (existeUser) {
-          res.status(400).json({ success: false, message: "email repetido" });
+          res.status(400).json({ success: false, message: "Ese email ya existe" });
           return;
         }
     
         const salt = await bcrypt.genSalt(10);
-        console.log("Salt", salt);
+        //console.log("Salt", salt);
         const password = await bcrypt.hash(req.body.password, salt);
     
         const newUser = {
-          nombre: req.body.name,
-          mail: req.body.email,
-          password: password
-          
+  
+          email: req.body.email,
+          password: password,
+          confirm: req.body.confirm,
+          genero: req.body.genero,
+          edad: req.body.edad,
+        
         };
     
         usuarios.push(newUser);
@@ -55,11 +58,9 @@
   };
     
   
-    const login = async(req, res, next) =>{
-
+    const login = async(req, res, next) => { 
       try {
-        
-          const user = usuarios.find((u) => u.mail === req.body.mail);
+          const user = usuarios.find((u) => u.email === req.body.email);
       
           if (!user) {
             return res
@@ -80,8 +81,9 @@
       
           const token = jwt.sign(
             {
-              name: user.name,
-              mail: user.mail,
+              
+              email: user.email,
+              password: user.password
             },
             TOKEN_SECRET
           );
@@ -97,10 +99,11 @@
       };
 
  const usuarios = [{
-   name: "Gustavo",
-  mail: "gustavoubal@aol.com",
-  password: "12345@test",
-  
+  email: "gustavoubal@aol.com",
+  password: "123abc",
+  confirmacion: "123abc",
+  genero: "pop",
+  edad: 25,
  }];
 
  const getUser = async (req, res, next) => {
@@ -113,7 +116,7 @@
  }
  
  module.exports = {
-   //registro, 
+   registro, 
    login,
    getUser
  }
